@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Live Exam{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timer-badge {
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .question-card {
+        border-radius: 10px;
+        transition: transform 0.1s ease;
+    }
+    .option-label {
+        cursor: pointer;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 12px 16px;
+        transition: all 0.2s ease;
+        display: block;
+        margin-bottom: 8px;
+    }
+    .option-label:hover {
+        background-color: #f1f8ff;
+        border-color: #0d6efd;
+    }
+    .form-check-input:checked + .option-text {
+        font-weight: 600;
+        color: #0d6efd;
+    }
+    .form-check-input:checked ~ .option-label,
+    .option-label.selected {
+        background-color: #e7f1ff;
+        border-color: #0d6efd;
+    }
+    .sticky-top-bar {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background: #ffffff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sticky-top-bar p-3 mb-4 rounded border">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h5 class="mb-0 text-primary fw-bold">EpicalExam Session</h5>
+            <small class="text-muted">Candidate: {{ session.get('user_name') }} | Roll: {{ session.get('roll_number') }}</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-muted">Time Remaining:</span>
+            <span id="timer" class="badge bg-danger timer-badge px-3 py-2">10:00</span>
+        </div>
+    </div>
+</div>
+
+<form id="examForm" method="POST" action="{{ url_for('submit_exam') }}">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            {% for q in questions %}
+            <div class="card question-card shadow-sm border-0 mb-4" id="q-card-{{ loop.index }}">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <span class="badge bg-primary">Question {{ loop.index }} of {{ questions|length }}</span>
+                    <span class="text-muted small">1 Mark</span>
+                </div>
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-4">{{ q.question }}</h5>
+                    
+                    <div class="options-container">
+                        <div class="form-check p-0 mb-2">
+                            <label class="option-label" for="q{{ q.id }}_a">
+                                <input class="form-check-input me-2" type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_a" value="A">
+                                <span class="option-text"><strong>A.</strong> {{ q.option_a }}</span>
+                            </label>
+                        </div>
+                        <div class="form-check p-0 mb-2">
+                            <label class="option-label" for="q{{ q.id }}_b">
+                                <input class="form-check-input me-2" type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_b" value="B">
+                                <span class="option-text"><strong>B.</strong> {{ q.option_b }}</span>
+                            </label>
+                        </div>
+                        <div class="form-check p-0 mb-2">
+                            <label class="option-label" for="q{{ q.id }}_c">
+                                <input class="form-check-input me-2" type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_c" value="C">
+                                <span class="option-text"><strong>C.</strong> {{ q.option_c }}</span>
+                            </label>
+                        </div>
+                        <div class="form-check p-0 mb-2">
+                            <label class="option-label" for="q{{ q.id }}_d">
+                                <input class="form-check-input me-2" type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_d" value="D">
+                                <span class="option-text"><strong>D.</strong> {{ q.option_d }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="d-flex justify-content-between align-items-center my-4 p-3 bg-white rounded border shadow-sm">
+                <span class="text-muted small">Make sure you have answered all questions before submitting.</span>
+                <button type="button" class="btn btn-primary btn-lg px-4" onclick="confirmSubmit()">
+                    ✅ Finish & Submit Exam
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="submitModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Submission</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to submit your exam now? You will not be able to modify your answers after submitting.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="doSubmit()">Yes, Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 10-minute exam timer (600 seconds)
+    let totalSeconds = 600;
+    const timerElement = document.getElementById("timer");
+    const form = document.getElementById("examForm");
+    let isSubmitting = false;
+
+    function updateTimer() {
+        if (totalSeconds <= 0) {
+            timerElement.innerText = "00:00";
+            timerElement.classList.replace("bg-danger", "bg-secondary");
+            if (!isSubmitting) {
+                isSubmitting = true;
+                alert("⏰ Time is up! Submitting your exam automatically...");
+                form.submit();
+            }
+            return;
+        }
+
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        timerElement.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        totalSeconds--;
+    }
+
+    const timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+
+    function confirmSubmit() {
+        const modal = new bootstrap.Modal(document.getElementById('submitModal'));
+        modal.show();
+    }
+
+    function doSubmit() {
+        isSubmitting = true;
+        clearInterval(timerInterval);
+        form.submit();
+    }
+
+    // Highlight selected options
+    document.querySelectorAll('.form-check-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const container = this.closest('.options-container');
+            container.querySelectorAll('.option-label').forEach(lbl => lbl.classList.remove('selected'));
+            this.closest('.option-label').classList.add('selected');
+        });
+    });
+</script>
+{% endblock %}

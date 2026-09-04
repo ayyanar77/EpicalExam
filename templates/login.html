@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4">Welcome to EpicalExam</h3>
+                
+                <!-- Nav tabs -->
+                <ul class="nav nav-pills nav-justified mb-4" id="loginTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="candidate-tab" data-bs-toggle="tab" data-bs-target="#candidate" type="button" role="tab" aria-controls="candidate" aria-selected="true">Candidate Login</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" aria-controls="admin" aria-selected="false">Admin Login</button>
+                    </li>
+                </ul>
+                
+                <!-- Tab panes -->
+                <div class="tab-content" id="loginTabsContent">
+                    <!-- Candidate Tab -->
+                    <div class="tab-pane fade show active" id="candidate" role="tabpanel" aria-labelledby="candidate-tab">
+                        <form method="POST" action="{{ url_for('login') }}">
+                            <input type="hidden" name="login_type" value="candidate">
+                            
+                            <div class="mb-3">
+                                <label for="candidateEmail" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="candidateEmail" name="email" required placeholder="Enter your email">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="candidatePassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="candidatePassword" name="password" required placeholder="Enter your password">
+                                <small class="text-muted">For testing: any email + password123</small>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">Login as Candidate</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Admin Tab -->
+                    <div class="tab-pane fade" id="admin" role="tabpanel" aria-labelledby="admin-tab">
+                        <form method="POST" action="{{ url_for('login') }}">
+                            <input type="hidden" name="login_type" value="admin">
+                            
+                            <div class="mb-3">
+                                <label for="adminUsername" class="form-label">Admin Username</label>
+                                <input type="text" class="form-control" id="adminUsername" name="username" required placeholder="Enter admin username">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="adminPassword" class="form-label">Admin Password</label>
+                                <input type="password" class="form-control" id="adminPassword" name="password" required placeholder="Enter admin password">
+                                <small class="text-muted">For testing: admin / admin123</small>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-dark btn-lg">Login as Admin</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

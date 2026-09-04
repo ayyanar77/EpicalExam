@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Exam Results{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Result Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-{% if percentage >= 50 %}success{% else %}danger{% endif %} text-white text-center py-3">
+                <h3 class="mb-0">{% if percentage >= 50 %}🎉 Congratulations!{% else %}📝 Exam Completed{% endif %}</h3>
+            </div>
+            <div class="card-body p-4 text-center">
+                <h5 class="text-muted mb-1">{{ result.Name }} (Roll: {{ result.RollNumber }})</h5>
+                <p class="text-muted small mb-4">{{ result.Email }}</p>
+
+                <div class="row g-3 justify-content-center mb-4">
+                    <div class="col-sm-4">
+                        <div class="p-3 bg-light rounded border">
+                            <span class="text-muted small d-block">Score</span>
+                            <span class="fs-3 fw-bold text-primary">{{ result.Score }} / {{ result.Total }}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 bg-light rounded border">
+                            <span class="text-muted small d-block">Percentage</span>
+                            <span class="fs-3 fw-bold text-info">{{ result.Percentage }}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 bg-light rounded border">
+                            <span class="text-muted small d-block">Result</span>
+                            <span class="fs-3 fw-bold text-{% if result.Status == 'PASSED' %}success{% else %}danger{% endif %}">{{ result.Status }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{{ url_for('instructions') }}" class="btn btn-outline-primary">Retake Exam</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Card -->
+        <div class="card shadow-sm border-0 mb-5">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold">🏆 Exam Leaderboard</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Roll No</th>
+                                <th>Candidate</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in leaderboard %}
+                            <tr {% if r.Email == session.get('user_email') %}class="table-primary fw-bold"{% endif %}>
+                                <td>
+                                    {% if loop.index == 1 %}🥇
+                                    {% elif loop.index == 2 %}🥈
+                                    {% elif loop.index == 3 %}🥉
+                                    {% else %}{{ loop.index }}{% endif %}
+                                </td>
+                                <td>{{ r.RollNumber }}</td>
+                                <td>{{ r.Name }}</td>
+                                <td>{{ r.Score }} / {{ r.Total }}</td>
+                                <td>{{ r.Percentage }}</td>
+                                <td>
+                                    <span class="badge bg-{% if r.Status == 'PASSED' %}success{% else %}danger{% endif %}">
+                                        {{ r.Status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-3 text-muted">No results recorded yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

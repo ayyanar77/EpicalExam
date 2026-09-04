@@ -1,0 +1,12 @@
+[
+    {
+        "Timestamp": "2026-09-04 22:32:01",
+        "RollNumber": "101",
+        "Name": "Test Candidate",
+        "Email": "candidate@example.com",
+        "Score": 5,
+        "Total": 5,
+        "Percentage": "100.00%",
+        "Status": "PASSED"
+    }
+]

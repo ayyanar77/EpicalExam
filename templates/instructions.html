@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Exam Instructions{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 mt-3">
+            <div class="card-header bg-primary text-white py-3">
+                <h4 class="mb-0 text-center">📋 EpicalExam Instructions</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info d-flex align-items-center" role="alert">
+                    <div>
+                        <strong>Candidate:</strong> {{ session.get('user_name') }} ({{ session.get('user_email') }}) | 
+                        <strong>Roll No:</strong> {{ session.get('roll_number') }}
+                    </div>
+                </div>
+                
+                <h5 class="fw-bold mt-3 mb-2">Important Guidelines:</h5>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item d-flex align-items-center">
+                        <span class="badge bg-primary rounded-pill me-3">1</span>
+                        <span><strong>Duration:</strong> You will have <strong>10 minutes</strong> to complete all questions.</span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <span class="badge bg-primary rounded-pill me-3">2</span>
+                        <span><strong>Question Format:</strong> Multiple Choice Questions (MCQ). Select exactly one option per question.</span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <span class="badge bg-primary rounded-pill me-3">3</span>
+                        <span><strong>Grading:</strong> Each correct answer awards 1 point. No negative marking.</span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <span class="badge bg-primary rounded-pill me-3">4</span>
+                        <span><strong>Auto-Submit:</strong> When the countdown reaches 00:00, your exam will automatically submit.</span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <span class="badge bg-danger rounded-pill me-3">5</span>
+                        <span><strong>Avoid Refreshing:</strong> Do not refresh or close the browser window during the test.</span>
+                    </li>
+                </ul>
+                
+                <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                    <a href="{{ url_for('exam') }}" class="btn btn-success btn-lg shadow-sm">
+                        🚀 Start Exam Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

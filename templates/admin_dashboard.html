@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h2 class="fw-bold mb-1">📊 Admin Dashboard</h2>
+        <p class="text-muted">Manage exams, review candidate submissions, and export analytics.</p>
+    </div>
+    <div class="col-md-5 text-md-end">
+        <a href="{{ url_for('export_excel') }}" class="btn btn-success btn-lg shadow-sm">
+            📥 Export Results to Excel (.xlsx)
+        </a>
+    </div>
+</div>
+
+<!-- Quick Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-primary text-white p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-white-50 text-uppercase mb-1">Total Submissions</h6>
+                    <h3 class="fw-bold mb-0">{{ results|length }}</h3>
+                </div>
+                <div class="fs-1 opacity-50">👥</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success text-white p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-white-50 text-uppercase mb-1">Passed</h6>
+                    <h3 class="fw-bold mb-0">{{ passed_count }}</h3>
+                </div>
+                <div class="fs-1 opacity-50">✅</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-danger text-white p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-white-50 text-uppercase mb-1">Failed</h6>
+                    <h3 class="fw-bold mb-0">{{ failed_count }}</h3>
+                </div>
+                <div class="fs-1 opacity-50">❌</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-info text-white p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-white-50 text-uppercase mb-1">Pass Rate</h6>
+                    <h3 class="fw-bold mb-0">{% if results|length > 0 %}{{ "%.1f"|format((passed_count / results|length) * 100) }}%{% else %}0%{% endif %}</h3>
+                </div>
+                <div class="fs-1 opacity-50">📈</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Table -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">Candidate Submissions</h5>
+        <span class="badge bg-light text-dark border">{{ results|length }} records found</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Roll No</th>
+                        <th>Candidate Name</th>
+                        <th>Email</th>
+                        <th>Score</th>
+                        <th>Total</th>
+                        <th>Percentage</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td><small class="text-muted">{{ r.Timestamp }}</small></td>
+                        <td><span class="badge bg-secondary">{{ r.RollNumber }}</span></td>
+                        <td class="fw-semibold">{{ r.Name }}</td>
+                        <td>{{ r.Email }}</td>
+                        <td class="fw-bold text-primary">{{ r.Score }}</td>
+                        <td>{{ r.Total }}</td>
+                        <td>{{ r.Percentage }}</td>
+                        <td>
+                            <span class="badge bg-{% if r.Status == 'PASSED' %}success{% else %}danger{% endif %}">
+                                {{ r.Status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            No exam submissions found yet. Once candidates complete tests, results will show up here.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Google Sheets Config Guide -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">⚙️ Google Sheets Integration Status</h5>
+        {% if is_sheets_connected %}
+            <div class="alert alert-success mb-0">
+                ✅ Connected to Google Sheets Database! Changes to candidate submissions and questions sync directly.
+            </div>
+        {% else %}
+            <div class="alert alert-warning mb-3">
+                ⚠️ Running with built-in default question bank and local backup storage.
+            </div>
+            <p class="small text-muted mb-2">To connect to your live Google Sheet:</p>
+            <ol class="small text-muted mb-0">
+                <li>Create a Google Service Account in Google Cloud Console and download the credentials JSON file.</li>
+                <li>Save the JSON file in <code>EpicalExam/</code> and set <code>GOOGLE_APPLICATION_CREDENTIALS=google_credentials.json</code> in <code>.env</code>.</li>
+                <li>Share your Google Sheet with the client email found in the JSON credentials with <em>Editor</em> permission.</li>
+                <li>Set <code>GOOGLE_SHEET_ID=&lt;your-sheet-id&gt;</code> in <code>.env</code>.</li>
+            </ol>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
